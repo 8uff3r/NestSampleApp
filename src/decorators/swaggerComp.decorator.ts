@@ -1,8 +1,8 @@
 import { ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { applyDecorators } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBody, ApiOperation } from '@nestjs/swagger';
-import { AdditionMultiplicationDto } from 'src/dto/addition-multiplication.dto';
-import { SubtractDto } from 'src/dto/subtract.dto';
+import { AdditionMultiplicationDto } from '../dto/addition-multiplication.dto';
+import { SubtractDto } from '../dto/subtract.dto';
 
 /**
  * Contains needed responses used in Swagger
