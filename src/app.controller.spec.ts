@@ -35,13 +35,17 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
+  it('Should be defined', () => {
+    expect(appController).toBeDefined();
+  });
+
   describe('addition', () => {
     it(`POST add and receive an exception`, () => {
       return request(app.getHttpServer()).post('/add').expect(400);
     });
 
     it('Should be defined', () => {
-      expect(appController).toBeDefined();
+      expect(appController.add).toBeDefined();
     });
 
     it('Should throw an error on empty input', () => {
@@ -79,9 +83,25 @@ describe('AppController', () => {
     it(`POST subtract`, () => {
       return request(app.getHttpServer()).post('/subtract').expect(400);
     });
+    it('Should be defined', () => {
+      expect(appController.subtract).toBeDefined();
+    });
     it('Should trow an error in case of an ivalid input', () => {
       //@ts-ignore
       expect(() => appController.subtract({ x: 2, y: 'a' })).toThrowError();
+    });
+  });
+
+  describe('multiplication', () => {
+    it('POST /multiply', () => {
+      return request(app.getHttpServer()).post('/multiply').expect(400);
+    });
+
+    it('Should be defined', () => {
+      expect(appController.multiply).toBeDefined();
+    });
+    it('Should throw an error in case of empty input', () => {
+      expect(() => appController.multiply({ input: '' })).toThrowError();
     });
   });
   afterAll(async () => {

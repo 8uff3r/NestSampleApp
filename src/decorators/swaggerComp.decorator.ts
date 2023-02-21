@@ -33,6 +33,9 @@ export function SwaggerCompDecSubtract() {
     ApiBadRequestResponse({
       description: ApiResponses.subtraction.badReq,
     }),
+    ApiOkResponse({
+      description: 'Returns the result of the subtraction',
+    }),
   );
 }
 

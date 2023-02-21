@@ -73,6 +73,8 @@ export class AppController {
    */
   @SwaggerCompDecMult()
   multiply(@Body(ValidationPipe) multiplicationDto: AdditionMultiplicationDto) {
-    return this.appService.multiply(multiplicationDto.input.split(','));
+    const numberArray = multiplicationDto.input;
+    if (!parseFloat(numberArray)) throw new BadRequestException();
+    return this.appService.multiply(numberArray.split(','));
   }
 }
