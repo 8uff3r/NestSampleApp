@@ -82,3 +82,26 @@ export function SwaggerCompDecMult() {
     }),
   );
 }
+
+export function SwaggerCompDecHistory() {
+  return applyDecorators(
+    ApiOperation({
+      summary:
+        'Gets the current unsaved history from redis and saved history from pg',
+    }),
+    ApiOkResponse({
+      description: 'Got the info correctly',
+    }),
+  );
+}
+
+export function SwaggerCompDecSave() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Saves the current redis cache to the database',
+    }),
+    ApiOkResponse({
+      description: 'Successfully saved the unsaved history',
+    }),
+  );
+}

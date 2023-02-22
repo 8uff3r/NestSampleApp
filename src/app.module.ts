@@ -2,11 +2,11 @@ import { Module, CacheModule } from '@nestjs/common';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { typeOrmConfig } from 'config/typeorm.config';
+import { typeOrmConfig } from '../config/typeorm.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppRepository } from './app.repository';
 // import { redisStore } from 'cache-manager-redis-yet';
-const redisStore = require('cache-manager-redis-yet').redisStore;
+// const redisStore = require('cache-manager-redis-yet').redisStore;
 
 @Module({
   imports: [
@@ -22,4 +22,4 @@ const redisStore = require('cache-manager-redis-yet').redisStore;
   controllers: [AppController],
   providers: [AppService, AppRepository],
 })
-export class AppModule {}
+export class AppModule { }

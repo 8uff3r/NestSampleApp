@@ -1,0 +1,39 @@
+import { TestingModule, Test } from '@nestjs/testing';
+import { describe } from 'node:test';
+import { DataSource } from 'typeorm';
+import { AppRepository } from './app.repository';
+
+describe('AppRepository', () => {
+  let appRepository: AppRepository;
+  const dataSource = {
+    createEntityManager: jest.fn(),
+  };
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AppRepository,
+        {
+          provide: DataSource,
+          useValue: dataSource,
+        },
+      ],
+    }).compile();
+    appRepository = module.get<AppRepository>(AppRepository);
+  });
+
+  describe('createItem', () => {
+    it('it should create a new item', () => {
+      const item = ['test'];
+      const history = {
+        item,
+      };
+
+      const createItemSpy = jest
+        .spyOn(appRepository, 'createItem')
+        //@ts-ignore
+        .mockResolvedValue(history as History);
+
+      const createdItem = appRepository.createItem();
+    });
+  });
+});

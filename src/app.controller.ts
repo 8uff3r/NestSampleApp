@@ -1,23 +1,23 @@
 import {
   BadRequestException,
   Body,
-  CacheTTL,
   Controller,
   Get,
   Post,
-  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import {
   SwaggerCompDecAdd,
+  SwaggerCompDecHistory,
   SwaggerCompDecMult,
+  SwaggerCompDecSave,
   SwaggerCompDecSubtract,
 } from './decorators/swaggerComp.decorator';
 import { AdditionMultiplicationDto } from './dto/addition-multiplication.dto';
 import Redis from 'ioredis';
-import { InjectRedis, DEFAULT_REDIS_NAMESPACE } from '@liaoliaots/nestjs-redis';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { SubtractDto } from './dto/subtract.dto';
 import { AppRepository } from './app.repository';
 
@@ -31,7 +31,7 @@ export class AppController {
     private readonly appService: AppService,
     @InjectRedis() private readonly redis: Redis,
     private appRepository: AppRepository,
-  ) {} // or // @InjectRedis(DEFAULT_REDIS_NAMESPACE) private readonly redis: Redis)
+  ) {}
 
   /**
    * Addition handler
@@ -50,8 +50,14 @@ export class AppController {
     const numberString = additionDto.input;
     if (!parseFloat(numberString)) throw new BadRequestException();
 
+    /**
+     * turn the input string to an array of numbers
+     */
     const numberArray = numberString.split(',');
 
+    /**
+     * initialize the history
+     */
     let historyString = '';
     const result = this.appService.add(numberArray);
 
@@ -78,7 +84,9 @@ export class AppController {
   @SwaggerCompDecMult()
   multiply(@Body(ValidationPipe) multiplicationDto: AdditionMultiplicationDto) {
     const numberString = multiplicationDto.input;
-    if (!parseFloat(numberString)) throw new BadRequestException();
+    if (!parseFloat(numberString)) {
+      throw new BadRequestException();
+    }
     const numberArray = numberString.split(',');
 
     const result = this.appService.multiply(numberArray);
@@ -109,10 +117,11 @@ export class AppController {
   /**
    * Use redis cache if requested within the 30s interval
    */
-  async subtract(@Body() subtractDto: SubtractDto): Promise<number> {
+  async subtract(
+    @Body(ValidationPipe) subtractDto: SubtractDto,
+  ): Promise<number> {
     /**
-     * throw exception if the request body is empty/invalidten","msg":"Acquiring the global lock for shutdown"}
-{"t":{"$date":"2023
+     * throw exception if the request body is empty/invalid
      */
     const result = this.appService.subtract(subtractDto);
     if (Number.isNaN(result))
@@ -124,26 +133,64 @@ export class AppController {
     return result;
   }
 
+  /**
+   * handler for getting the saved and unsaved history
+   */
   @Get('history')
+  /**
+   * Swagger decorators for history
+   */
+  @SwaggerCompDecHistory()
   async getHistory() {
+    /**
+     * get all the unsaved history from redis
+     */
     const unsaved = await this.redis.lrange('history', 0, -1);
-    const query = await this.appRepository.find({
-      select: {
-        item: true,
-      },
-    });
+
+    /**
+     *initialize the object to be returned
+     */
     let returnObject: { saved: string[][]; unsaved: string[][] } = {
       saved: [],
       unsaved: [],
     };
-    for (const i of query.values()) {
-      returnObject.saved.push(i.item);
+    try {
+      /**
+       * find all saved history items from the database
+       */
+      const query = await this.appRepository.find({
+        select: {
+          item: true,
+        },
+      });
+      /**
+       * push each item in database to the "saved" key of the returned object
+       */
+
+      for (const i of query.values()) {
+        returnObject.saved.push(i.item);
+      }
+      /**
+       *in case of error push a notice to the object instead
+       */
+    } catch (error) {
+      returnObject.saved.push(["There's no saved history"]);
     }
+    /**
+     * push redis unsaved history to the returnObject
+     */
     returnObject.unsaved.push(unsaved);
     return returnObject;
   }
 
+  /**
+   * handler for saving the unsaved history to the database
+   */
   @Get('save')
+  /**
+   * Swagger decorators for save route
+   */
+  @SwaggerCompDecSave()
   async saveHistory() {
     const currentHistory = await this.redis.lrange('history', 0, -1);
     await this.appRepository.createItem(currentHistory);

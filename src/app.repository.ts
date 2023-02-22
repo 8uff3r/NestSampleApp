@@ -11,6 +11,6 @@ export class AppRepository extends Repository<History> {
   async createItem(newSave: string[]) {
     const history = new History();
     history.item = newSave;
-    await history.save();
+    return await history.save();
   }
 }
